@@ -337,7 +337,7 @@ CFLAGS += -DDFU_APP_DATA_RESERVED=$(DFU_APP_DATA_RESERVED)
 
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 # Fixes for gcc version 12 and 13.
-ifneq (,$(filter 12.% 13.%,$(shell $(CC) -dumpversion 2>/dev/null)))
+ifneq (,$(filter 12.% 13.% 14.%,$(shell $(CC) -dumpversion 2>/dev/null)))
 	CFLAGS += --param=min-pagesize=0
 endif
 
@@ -432,7 +432,7 @@ $(BUILD)/$(OUT_NAME).hex: $(BUILD)/$(OUT_NAME).out
 # Hex file with mbr (still no SD)
 $(BUILD)/$(OUT_NAME)_nosd.hex: $(BUILD)/$(OUT_NAME).hex
 	@echo Create $(notdir $@)
-	@python3 tools/hexmerge.py --overlap=replace -o $@ $< $(MBR_HEX)
+	@uv run --with intelhex python3 tools/hexmerge.py --overlap=replace -o $@ $< $(MBR_HEX)
 
 # Bootolader self-update uf2
 $(BUILD)/update-$(OUT_NAME)_nosd.uf2: $(BUILD)/$(OUT_NAME)_nosd.hex
@@ -442,7 +442,7 @@ $(BUILD)/update-$(OUT_NAME)_nosd.uf2: $(BUILD)/$(OUT_NAME)_nosd.hex
 # merge bootloader and sd hex together
 $(BUILD)/$(MERGED_FILE).hex: $(BUILD)/$(OUT_NAME).hex
 	@echo Create $(notdir $@)
-	@python3 tools/hexmerge.py -o $@ $< $(SD_HEX)
+	@uv run --with intelhex python3 tools/hexmerge.py -o $@ $< $(SD_HEX)
 
 # Create pkg zip file for bootloader+SD combo to use with DFU CDC
 $(BUILD)/$(MERGED_FILE).zip: $(BUILD)/$(OUT_NAME).hex
